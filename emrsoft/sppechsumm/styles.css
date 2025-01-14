@@ -1,0 +1,1089 @@
+:root {
+    --primary: #75A7C4;
+    --secondary: #A0B8C9;
+    --background: rgba(255, 255, 255, 0.6);
+    --card-bg: rgba(212, 230, 241, 0.8);
+    --text: #2C3E50;
+    --shadow: rgba(0, 0, 0, 0.08);
+    --error: rgba(191, 197, 214, 0.7);
+    --editor-bg: rgba(248, 249, 250, 0.9);
+    --toolbar-bg: rgba(230, 238, 244, 0.85);
+    --border-color: rgba(170, 186, 205, 0.6);
+    --hover-color: rgba(197, 216, 230, 0.9);
+    --editor-font-size: 13px;
+    --editor-line-height: 1.5;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    background-color: var(--background);
+    font-family: 'Inter', sans-serif;
+    width: 400px;
+    max-height: 600px;
+    overflow: hidden;
+}
+
+.popup-wrapper {
+    width: 100%;
+    height: 100%;
+    overflow-y: auto;
+    padding: 16px;
+    box-sizing: border-box;
+    backdrop-filter: blur(10px);
+    border-radius: 12px;
+    transition: all 0.3s ease; /* Smooth transition for resizing */
+}
+
+.popup-wrapper.history-open {
+    width: 500px; /* Increased width */
+    height: 700px; /* Increased height */
+    max-height: 700px; /* Increased max-height */
+}
+
+.main-container {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding-bottom: 16px;
+    padding: 20px;
+    border-radius: 16px;
+}
+
+.title-container {
+    background: var(--card-bg);
+    padding: 16px;
+    border-radius: 16px;
+    box-shadow: 0 2px 8px var(--shadow);
+    margin-bottom: 16px;
+    text-align: center;
+}
+
+.app-title {
+    color: var(--text);
+    font-size: 28px;
+    font-weight: 800;
+    margin: 0;
+    background: linear-gradient(45deg, var(--primary), var(--secondary));
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: -0.5px;
+}
+
+.button-group {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+}
+
+.action-button {
+    padding: 10px 16px;
+    background: rgba(255, 255, 255, 0.8);
+    color: var(--text);
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px var(--shadow);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.action-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px var(--shadow);
+    background: var(--primary);
+    color: white;
+}
+
+.result-card {
+    background: rgba(255, 255, 255, 0.8);
+    padding: 0;
+    overflow: hidden;
+    border-radius: 15px;
+    margin-bottom: 24px;
+    text-align: justify;
+    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.05);
+    border: 1px solid var(--border-color);
+}
+
+.result-content {
+    line-height: 1.6;
+}
+
+.result-content ul {
+    padding-left: 20px;
+}
+
+.result-content li {
+    margin-bottom: 8px;
+}
+
+.result-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px var(--shadow);
+}
+
+.process-container {
+    display: flex;
+    gap: 8px;
+    margin: 16px 0;
+}
+
+.process-button {
+    width: 100%;
+    padding: 16px;
+    background: rgba(117, 167, 196, 0.8);
+    color: white;
+    border: none;
+    border-radius: 24px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.process-button::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 200%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.3),
+        transparent
+    );
+    transform: translateX(-100%);
+    transition: all 0.5s ease;
+    animation: waveFlow 4s infinite;
+}
+
+.process-button.processing::after {
+    animation: waveFlow 4s infinite;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.3),
+        transparent
+    );
+}
+
+@keyframes waveFlow {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+.cancel-button {
+    padding: 12px;
+    background: var(--error);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 14px;
+    opacity: 0;
+    transform: scale(0);
+    transition: all 0.2s ease;
+}
+
+.cancel-button.visible {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.record-controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 40px;
+    margin: 24px 0;
+    position: relative;
+    padding-right: 48px;
+    padding-left: 48px;
+}
+
+.record-button {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: var(--primary);
+    border: none;
+    box-shadow: 0 4px 12px rgba(117, 167, 196, 0.2);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+}
+
+.record-button i {
+    font-size: 24px;
+    color: white;
+    transition: all 0.3s ease;
+}
+
+.record-button.recording {
+    background: var(--error);
+    animation: pulseGlow 1.5s infinite;
+}
+
+.record-button.recording.paused {
+    animation: none;
+    background: var(--secondary);
+}
+
+.pause-button {
+    position: relative;
+    left: -100px; 
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--secondary);
+    border: none;
+    color: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.pause-button.visible {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.pause-button:hover {
+    transform: scale(1.05);
+    background: var(--primary);
+}
+
+.cancel-record {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--error);
+    border: none;
+    color: white;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.cancel-record.visible {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+@keyframes pulseGlow {
+    0% { box-shadow: 0 0 0 0 rgba(255, 107, 107, 0.4); }
+    70% { box-shadow: 0 0 0 20px rgba(255, 107, 107, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(255, 107, 107, 0); }
+}
+
+::-webkit-scrollbar {
+    width: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--background);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--primary);
+    border-radius: 3px;
+}
+
+.audio-section {
+    background: rgb(255, 255, 255);
+    padding: 16px;
+    border-radius: 24px;
+    margin: 20px 0;
+    opacity: 1;
+    transition: all 0.3s ease;
+    position: relative;
+    transform-style: preserve-3d;
+    border-radius: 25px;
+}
+
+.audio-section::before {
+    content: "";
+    position: absolute; 
+    inset: 0px;
+    transform: translate3d(0px,0px,-1px);
+    border-radius: inherit;
+    pointer-events: none;
+}
+
+.audio-section audio {
+    width: 100%;
+    height: 36px;
+}
+
+.audio-visualizer {
+    height: 40px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    margin: 10px 0;
+    opacity: 0;
+    transform: translateY(0);
+    transition: all 0.3s ease;
+    min-height: 40px;
+    background-color: rgba(0, 0, 0, 0.02);
+    border-radius: 20px;
+    padding: 0 10px;
+}
+
+.audio-visualizer.active {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.bar {
+    flex: 1;
+    background: linear-gradient(90deg, rgb(0, 0, 0) 0%, rgb(67, 152, 165) 40%, rgb(243, 243, 243) 84%);
+    height: 2px;
+    border-radius: 2px;
+    transform-origin: bottom;
+    transition: height 0.2s ease;
+}
+
+.editor-toolbar {
+    display: flex;
+    gap: 4px;
+    padding: 8px;
+    background: linear-gradient(
+        to right,
+        rgba(230, 238, 244, 0.85),
+        rgba(212, 230, 241, 0.85)
+    );
+    border-radius: 16px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.editor-btn {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    background: transparent;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    color: var(--text);
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.editor-btn:hover {
+    background: var(--hover-color);
+}
+
+.editor-btn.active {
+    background: var(--primary);
+    color: white;
+}
+
+.editor-content {
+    padding: 16px;
+    min-height: 150px;
+    border: none;
+    outline: none;
+    font-family: 'Inter', sans-serif;
+    font-size: var(--editor-font-size);
+    line-height: var(--editor-line-height);
+    color: var(--text);
+    background: rgba(255, 255, 255, 0.8);
+    text-align: justify;
+    hyphens: auto;
+    word-spacing: -0.05em;
+}
+
+.editor-content p {
+    margin: 0 0 8px 0;
+    text-align: justify;
+}
+
+.editor-content:focus {
+    outline: none;
+}
+
+.result-card h2 {
+    margin: 0;
+    padding: 16px;
+    background: var(--card-bg);
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+}
+
+.editor-header {
+    padding: 16px 20px;
+    background: var(--editor-bg);
+    border-bottom: 1px solid var(--border-color);
+    border-radius: 12px 12px 0 0;
+}
+
+.editor-header h2 {
+    margin: 0;
+    padding: 12px 16px;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text);
+    margin: 0 0 12px 0;
+}
+
+.toolbar-group {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+    padding: 2px;
+    background: white;
+    border-radius: 12px;
+}
+
+.toolbar-divider {
+    width: 1px;
+    height: 24px;
+    background: var(--border-color);
+    margin: 0 4px;
+}
+
+.font-select, .font-size {
+    padding: 6px 8px;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    font-size: 13px;
+    color: var(--text);
+    background: white;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-width: 120px;
+}
+
+.font-size {
+    min-width: 70px;
+}
+
+.editor-content[style*="text-align: left"] { text-align: left !important; }
+.editor-content[style*="text-align: center"] { text-align: center !important; }
+.editor-content[style*="text-align: right"] { text-align: right !important; }
+.editor-content[style*="text-align: justify"] {
+    text-align: justify !important;
+    word-spacing: -0.05em !important;
+}
+
+.editor-content ul, .editor-content ol {
+    margin: 12px 0;
+    padding-left: 24px;
+}
+
+.editor-content li {
+    margin: 6px 0;
+}
+
+select:hover, .editor-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+select:focus, .editor-btn:active {
+    transform: translateY(0);
+    box-shadow: none;
+}
+
+.custom-audio-player {
+    background: white;
+    border-radius: 12px;
+    padding: 12px;
+    box-shadow: 0 2px 8px var(--shadow);
+    margin-top: 12px;
+}
+
+.audio-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.play-pause-btn {
+    min-width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--primary);
+    border: none;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.time-slider {
+    flex-grow: 1;
+    height: 4px;
+    background: #e0e0e0;
+    border-radius: 2px;
+    cursor: pointer;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.time-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    width: 12px;
+    height: 12px;
+    background: var(--primary);
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.time-slider::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+}
+
+.time-slider::-moz-range-thumb {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    width: 12px;
+    height: 12px;
+    background: var(--primary);
+    border-radius: 50%;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s ease;
+}
+
+.font-select,
+.font-size,
+.time-slider,
+audio::-webkit-media-controls-panel {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+}
+
+audio {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    width: 100%;
+}
+
+select {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%232C3E50'%3E%3Cpath d='M6 9L1 4h10L6 9z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    padding-right: 24px !important;
+}
+
+.process-controls {
+    position: relative;
+    width: 100%;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.cancel-process-button {
+    width: 36px;
+    height: 36px;
+    border-radius: 18px;
+    background: var(--error);
+    border: none;
+    color: white;
+    cursor: pointer;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    opacity: 0;
+    transform: scale(0);
+}
+
+.cancel-process-button.visible {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.cancel-process-button:hover {
+    background: #ff4444;
+    transform: scale(1.05);
+}
+
+.editor-sections {
+    padding: 20px;
+}
+
+.editor-section {
+    margin-bottom: 24px;
+}
+
+.editor-section h2 {
+    color: var(--text);
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0 0 12px 0;
+    padding: 0;
+    background: none;
+    border: none;
+}
+
+.editor-section:not(:last-child) {
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 20px;
+    margin-bottom: 20px;
+}
+
+/* Editor content formatting */
+.editor-content {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    padding: 16px;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 8px;
+    margin-top: 8px;
+}
+
+/* Insights bullet points */
+.editor-content ul {
+    list-style-type: none; /* Remove default bullets */
+    padding-left: 0; /* Remove default padding */
+}
+
+.editor-content li {
+    position: relative;
+    padding-left: 1.5em; /* Add space for custom bullet */
+    margin-bottom: 12px; /* Adjust spacing between list items */
+    line-height: 1.5; /* Adjust line height */
+    font-family: 'Inter', sans-serif; /* Use a supported font */
+}
+
+.editor-content li::before {
+    content: '•'; /* Use the bullet character */
+    position: absolute;
+    left: 0;
+    color: var(--primary); /* Match the bullet color to your theme */
+    font-size: 1.2em; /* Adjust bullet size */
+}
+
+/* Section spacing */
+.editor-section {
+    margin-bottom: 24px;
+    padding-bottom: 24px;
+}
+
+.editor-section:not(:last-child) {
+    border-bottom: 1px solid var(--border-color);
+}
+
+/* Section headers */
+.editor-section h2 {
+    color: var(--text);
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0;
+}
+
+/* Download Button */
+.download-button {
+    padding: 12px 24px;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 24px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px var(--shadow);
+}
+
+.download-button:hover {
+    background: var(--secondary);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px var(--shadow);
+}
+
+.download-button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px var(--shadow);
+}
+
+/* Editable Card Content */
+.result-content[contenteditable="true"] {
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.9);
+    outline: none;
+    transition: all 0.2s ease;
+}
+
+.result-content[contenteditable="true"]:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px rgba(117, 167, 196, 0.2);
+}
+
+.results-section {
+    max-height: 300px; /* Adjust based on your needs */
+    overflow-y: auto;
+    padding-right: 8px; /* Add some padding to avoid scrollbar overlap */
+}
+
+/* Custom scrollbar for results section */
+.results-section::-webkit-scrollbar {
+    width: 6px;
+}
+
+.results-section::-webkit-scrollbar-thumb {
+    background: var(--primary);
+    border-radius: 3px;
+}
+
+.results-section::-webkit-scrollbar-track {
+    background: var(--background);
+}
+
+.result-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px var(--shadow);
+    transition: all 0.3s ease;
+}
+
+.error-message {
+    background: var(--error);
+    color: white;
+    padding: 12px;
+    border-radius: 8px;
+    margin: 16px 0;
+    text-align: center;
+    font-size: 14px;
+    font-weight: 500;
+    box-shadow: 0 2px 8px var(--shadow);
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 400px) {
+    .record-controls {
+        gap: 20px;
+        padding-right: 24px;
+        padding-left: 24px;
+    }
+
+    .record-button {
+        width: 56px;
+        height: 56px;
+    }
+
+    .pause-button {
+        width: 40px;
+        height: 40px;
+    }
+
+    .process-button {
+        padding: 12px;
+        font-size: 14px;
+    }
+
+    .download-button {
+        padding: 10px 20px;
+        font-size: 13px;
+    }
+}
+
+/* History Icon */
+.history-icon {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    cursor: pointer;
+    color: var(--text);
+    font-size: 20px;
+    z-index: 10;
+}
+
+.history-icon:hover {
+    color: var(--primary);
+}
+
+/* History Container */
+.history-container {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%; /* Take up the full height of the popup */
+    background: white;
+    z-index: 100;
+    padding: 16px;
+    box-sizing: border-box;
+    backdrop-filter: blur(10px);
+    border-radius: 12px;
+    overflow-y: auto; /* Ensure the container is scrollable if content exceeds height */
+}
+
+/* History List */
+.history-list {
+    max-height: calc(100% - 60px); /* Adjusted to fit within the container */
+    overflow-y: auto;
+    padding-right: 8px;
+}
+
+/* History Header */
+.history-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.history-header h2 {
+    margin: 0;
+    font-size: 24px;
+    color: var(--text);
+}
+
+.close-history-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text);
+    font-size: 20px;
+}
+
+.close-history-button:hover {
+    color: var(--primary);
+}
+
+/* History Item */
+.history-item {
+    background: rgba(255, 255, 255, 0.8);
+    padding: 16px;
+    border-radius: 12px;
+    margin-bottom: 12px;
+    box-shadow: 0 2px 8px var(--shadow);
+    transition: all 0.3s ease;
+}
+
+.history-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px var(--shadow);
+}
+
+.history-item h3 {
+    margin: 0 0 8px 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.history-item p {
+    margin: 4px 0;
+    font-size: 14px;
+    color: var(--text);
+}
+
+.history-item p strong {
+    font-weight: 600;
+}
+
+.history-item small {
+    display: block;
+    margin-top: 8px;
+    font-size: 12px;
+    color: #666;
+}
+
+/* Audio Player in History */
+.audio-player {
+    margin-bottom: 16px;
+}
+
+.audio-player audio {
+    width: 100%;
+    height: 36px;
+}
+
+/* Extracted Content in History */
+.extracted-content {
+    background: rgba(255, 255, 255, 0.8);
+    padding: 16px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px var(--shadow);
+}
+
+.extracted-content h3 {
+    margin: 0 0 12px 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.extracted-content p {
+    margin: 8px 0;
+    font-size: 14px;
+    color: var(--text);
+}
+
+.extracted-content p strong {
+    font-weight: 600;
+}
+
+.extracted-content small {
+    display: block;
+    margin-top: 12px;
+    font-size: 12px;
+    color: #666;
+}
+
+/* Medical Information */
+.medical-info {
+    margin-top: 16px;
+}
+
+.medical-info h4 {
+    margin: 0 0 12px 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.medical-section {
+    margin-bottom: 16px;
+}
+
+.medical-section h5 {
+    margin: 0 0 8px 0;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.medical-section ul {
+    list-style-type: none;
+    padding-left: 0;
+    margin: 0;
+}
+
+.medical-section li {
+    margin: 4px 0;
+    font-size: 13px;
+    color: var(--text);
+}
+
+.medical-section li strong {
+    font-weight: 600;
+}
+
+
+/* Upload Button */
+.upload-button {
+    padding: 12px 24px;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 24px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px var(--shadow);
+    margin: 16px 0;
+}
+
+.upload-button:hover {
+    background: var(--secondary);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px var(--shadow);
+}
+
+.upload-button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px var(--shadow);
+}
+
+.upload-controls {
+    display: flex;
+    justify-content: center;
+    margin: 16px 0;
+}
+
+
+/* Dashboard Button */
+.dashboard-button {
+    padding: 12px 24px;
+    background: var(--primary); /* Use your primary color variable */
+    color: white;
+    border: none;
+    border-radius: 24px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px var(--shadow); /* Use your shadow color variable */
+    margin: 16px 0;
+}
+
+.dashboard-button:hover {
+    background: var(--secondary); /* Use your secondary color variable */
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px var(--shadow); /* Use your shadow color variable */
+}
+
+.dashboard-button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px var(--shadow); /* Use your shadow color variable */
+}
+
+/* Dashboard Button Container */
+.dashboard-controls {
+    display: flex;
+    justify-content: center;
+    margin: 16px 0;
+}

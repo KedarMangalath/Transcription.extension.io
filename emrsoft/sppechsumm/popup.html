@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<meta charset="UTF-8">
+<html>
+<head>
+    <title>Transcribe.IO</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="styles.css" rel="stylesheet">
+</head>
+<body>
+    <div class="popup-wrapper">
+        <!-- Main Container -->
+        <div class="main-container">
+            <h1 class="app-title">Transcribe.IO</h1>
+
+            <!-- Record Tab -->
+            <div id="recordSection" class="tab-content active">
+                <!-- Record Controls -->
+                <div class="record-controls">
+                    <button id="pauseButton" class="pause-button">
+                        <i class="fas fa-pause"></i>
+                    </button>
+                    <button id="recordButton" class="record-button">
+                        <i class="fas fa-microphone"></i>
+                    </button>
+                </div>
+
+                <!-- Audio Player Section -->
+                <div id="audioPlayer" class="audio-section" style="display: none;">
+                    <audio controls>
+                        <source id="audioSource" type="audio/wav">
+                        Your browser does not support the audio element.
+                    </audio>
+                </div>
+
+                <!-- Upload Button -->
+                <div class="upload-controls">
+                    <input type="file" id="uploadAudio" accept="audio/*" style="display: none;">
+                    <button id="uploadButton" class="upload-button">
+                        <i class="fas fa-upload"></i> Upload Audio
+                    </button>
+                </div>
+
+                <!-- Process Controls -->
+                <div class="process-controls">
+                    <button id="processBtn" class="process-button">Process Audio</button>
+                    <button id="cancelProcessBtn" class="cancel-process-button">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                <!-- Results Section -->
+                <div id="results" class="results-section" style="display: none;">
+                    <!-- Dynamic cards will be inserted here -->
+                </div>
+
+                <!-- Download Button -->
+                <div class="download-controls">
+                    <button id="downloadBtn" class="download-button" style="display: none;">
+                        <i class="fas fa-download"></i> Download Medical Record
+                    </button>
+                </div>
+
+                <!-- Dashboard Button -->
+                <div class="dashboard-controls">
+                    <button id="dashboardBtn" class="dashboard-button">
+                        <i class="fas fa-tachometer-alt"></i> Go to Dashboard
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script for handling popup functionality -->
+    <script src="popup.js"></script>
+</body>
+</html>
