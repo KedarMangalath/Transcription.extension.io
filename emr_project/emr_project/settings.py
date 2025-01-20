@@ -39,6 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'corsheaders',
     'emr_app',
+    'rest_framework',
+    'rest_framework.authtoken', 
 ]
 
 MIDDLEWARE = [
@@ -55,6 +57,32 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'emr_project.urls'
 CORS_ORIGIN_ALLOW_ALL = True  # Allow all origins for CORS
+
+CORS_ALLOWED_ORIGINS = [
+    "chrome-extension://*",
+    "http://82.180.144.138:5645",
+]
+
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+]
+
+CORS_ALLOW_METHODS = [
+    'DELETE',
+    'GET',
+    'OPTIONS',
+    'PATCH',
+    'POST',
+    'PUT',
+]
 
 TEMPLATES = [
     {
@@ -133,3 +161,9 @@ import os
 # Media settings
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+    ],
+}

@@ -8,13 +8,71 @@
             margin: 0;
             padding: 20px;
             background-color: #f4f4f9;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
         h1 {
             color: #333;
+            text-align: center;
+        }
+        .login-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            width: 100%;
+            max-width: 400px;
+        }
+        .login-container h2 {
+            margin: 0 0 20px 0;
+            color: #333;
+            text-align: center;
+        }
+        .login-container input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+        }
+        .login-container button {
+            width: 100%;
+            padding: 10px;
+            background: #75A7C4;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .login-container button:hover {
+            background: #5a8ca9;
+        }
+        .login-error {
+            color: red;
+            text-align: center;
+            margin-top: 10px;
+        }
+        .search-bar {
+            width: 100%;
+            max-width: 600px;
+            margin-bottom: 20px;
+        }
+        .search-bar input {
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            font-size: 16px;
         }
         ul {
             list-style-type: none;
             padding: 0;
+            width: 100%;
+            max-width: 800px;
         }
         li {
             background: white;
@@ -22,10 +80,11 @@
             padding: 15px;
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
         }
-        audio {
-            width: 100%;
-            margin-top: 10px;
+        li:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
         .history-item {
             display: flex;
@@ -35,28 +94,211 @@
         .history-item h3 {
             margin: 0;
             color: #555;
+            cursor: pointer;
         }
         .history-item p {
             margin: 5px 0;
             color: #777;
+            text-align: justify;
+        }
+        .history-item .details {
+            display: none;
+            margin-top: 10px;
+        }
+        .history-item.expanded .details {
+            display: block;
+        }
+        audio {
+            width: 100%;
+            margin-top: 10px;
+        }
+        .extracted-content {
+            background: #f9f9f9;
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 10px;
+            text-align: justify;
+        }
+        .extracted-content h4 {
+            margin: 0 0 10px 0;
+            color: #333;
+        }
+        .extracted-content p {
+            margin: 5px 0;
+            color: #555;
+        }
+        .no-results {
+            text-align: center;
+            color: #777;
+            font-size: 18px;
+            margin-top: 20px;
+        }
+        .hidden {
+            display: none;
         }
     </style>
 </head>
 <body>
-    <h1>History</h1>
-    <ul>
-        {% for entry in history %}
-            <li class="history-item">
-                <h3>{{ entry.audio_name }}</h3>
-                <p><strong>Transcription:</strong> {{ entry.transcription }}</p>
-                <p><strong>Extracted Content:</strong> {{ entry.extracted_content }}</p>
-                <audio controls>
-                    <source src="http://localhost:8000/media/audio/{{ entry.audio_filename }}" type="audio/wav">
-                    Your browser does not support the audio element.
-                </audio>
-                <p><small>{{ entry.timestamp }}</small></p>
-            </li>
-        {% endfor %}
-    </ul>
+    <!-- Login Container (Visible by Default) -->
+    <div class="login-container" id="loginContainer">
+        <h2>Login</h2>
+        <form id="loginForm">
+            <input type="text" id="username" placeholder="Username" required>
+            <input type="password" id="password" placeholder="Password" required>
+            <button type="submit">Login</button>
+        </form>
+        <p class="login-error" id="loginError"></p>
+    </div>
+
+    <!-- Dashboard Content (Hidden by Default) -->
+    <div id="dashboardContent" class="hidden">
+        <h1>History</h1>
+        <div class="search-bar">
+            <input type="text" id="searchInput" placeholder="Search history...">
+        </div>
+        <ul id="historyList">
+            {% if history %}
+                {% for entry in history %}
+                    <li class="history-item" onclick="toggleDetails(this)">
+                        <h3>{{ entry.audio_name }}</h3>
+                        <p><strong>Timestamp:</strong> {{ entry.timestamp }}</p>
+                        <div class="details">
+                            <p><strong>Transcription:</strong> {{ entry.transcription }}</p>
+                            <div class="extracted-content">
+                                <h4>Extracted Content</h4>
+                                <p><strong>Main Complaint:</strong> {{ entry.extracted_content.patient_symptoms.main_complaint }}</p>
+                                <p><strong>Other Symptoms:</strong> {{ entry.extracted_content.patient_symptoms.other_symptoms }}</p>
+                                <p><strong>Duration:</strong> {{ entry.extracted_content.patient_symptoms.duration }}</p>
+                                <p><strong>Allergies:</strong> {{ entry.extracted_content.medical_history.allergies }}</p>
+                                <p><strong>Conditions:</strong> {{ entry.extracted_content.medical_history.conditions }}</p>
+                                <p><strong>Medications:</strong> {{ entry.extracted_content.medical_history.medications }}</p>
+                                <p><strong>Symptoms Detail:</strong> {{ entry.extracted_content.current_assessment.symptoms_detail }}</p>
+                                <p><strong>Severity:</strong> {{ entry.extracted_content.current_assessment.severity }}</p>
+                                <p><strong>Triggers:</strong> {{ entry.extracted_content.current_assessment.triggers }}</p>
+                                <p><strong>Likely Condition:</strong> {{ entry.extracted_content.diagnosis.likely_condition }}</p>
+                                <p><strong>Other Possibilities:</strong> {{ entry.extracted_content.diagnosis.other_possibilities }}</p>
+                                <p><strong>Reasoning:</strong> {{ entry.extracted_content.diagnosis.reasoning }}</p>
+                                <p><strong>Suggested Tests:</strong> {{ entry.extracted_content.diagnosis.suggested_tests }}</p>
+                            </div>
+                            <audio controls>
+                                <source src="http://localhost:8000/media/audio/{{ entry.audio_filename }}" type="audio/wav">
+                                Your browser does not support the audio element.
+                            </audio>
+                        </div>
+                    </li>
+                {% endfor %}
+            {% else %}
+                <p class="no-results">No history found.</p>
+            {% endif %}
+        </ul>
+    </div>
+
+    <script>
+        // Check if the user is already logged in (e.g., token exists in localStorage)
+        const token = localStorage.getItem('authToken');
+        if (token) {
+            // User is already logged in, show the dashboard content
+            document.getElementById('loginContainer').classList.add('hidden');
+            document.getElementById('dashboardContent').classList.remove('hidden');
+            fetchUserHistory(token); // Fetch user history if logged in
+        }
+
+        // Handle Login Form Submission
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                const response = await fetch('http://localhost:8000/api-token-auth/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ username, password }),
+                });
+
+                if (!response.ok) {
+                    throw new Error('Login failed');
+                }
+
+                const data = await response.json();
+                const token = data.token;
+
+                // Store the token in localStorage
+                localStorage.setItem('authToken', token);
+
+                // Hide login container and show dashboard
+                document.getElementById('loginContainer').classList.add('hidden');
+                document.getElementById('dashboardContent').classList.remove('hidden');
+
+                // Create and dispatch a custom event
+                const event = new CustomEvent('tokenUpdated', { detail: token });
+                window.dispatchEvent(event);
+
+                // Fetch and display user history
+                fetchUserHistory(token);
+                
+            } catch (error) {
+                document.getElementById('loginError').textContent = 'Invalid username or password';
+            }
+        });
+
+        // Add event listener for token updates
+        window.addEventListener('tokenUpdated', (event) => {
+            const token = event.detail;
+            // You can add additional handling here if needed
+        });
+
+        // Fetch User History (Example)
+        async function fetchUserHistory(token) {
+            try {
+                const response = await fetch('http://localhost:8000/api/get-history/', {
+                    headers: {
+                        Authorization: `Token ${token}`,
+                    },
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to fetch history');
+                }
+
+                const data = await response.json();
+                console.log('User History:', data);
+                // Update the UI with the fetched history data
+            } catch (error) {
+                console.error('Error fetching history:', error);
+            }
+        }
+
+        // Toggle Details for History Items
+        function toggleDetails(item) {
+            item.classList.toggle('expanded');
+        }
+
+        // Search Functionality
+        document.getElementById('searchInput').addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            const historyItems = document.querySelectorAll('#historyList li');
+            let hasResults = false;
+
+            historyItems.forEach(item => {
+                const text = item.textContent.toLowerCase();
+                if (text.includes(searchTerm)) {
+                    item.style.display = 'block';
+                    hasResults = true;
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+
+            // Show "No results" message if no items match the search
+            const noResultsMessage = document.querySelector('.no-results');
+            if (noResultsMessage) {
+                noResultsMessage.style.display = hasResults ? 'none' : 'block';
+            }
+        });
+    </script>
 </body>
 </html>

@@ -1,8 +1,11 @@
+# emr_app/urls.py
 from django.urls import path
-from . import views
+from .views import RegisterView, process_audio, get_user_history, dashboard
 
 urlpatterns = [
-    path('process-audio/', views.process_audio, name='process_audio'),
-    path('get-history/', views.get_user_history, name='get_history'),
-    path('dashboard/', views.dashboard, name='dashboard'),  # Add this line
+    # Remove 'api/' prefix from these URLs
+    path('register/', RegisterView.as_view(), name='register'),
+    path('process-audio/', process_audio, name='process_audio'),
+    path('get-history/', get_user_history, name='get_history'),
+    path('dashboard/', dashboard, name='dashboard'),
 ]

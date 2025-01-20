@@ -9,12 +9,22 @@
 </head>
 <body>
     <div class="popup-wrapper">
+        <!-- Add dashboard icon button at the top -->
+        <button id="dashboardBtn" class="dashboard-icon">
+            <i class="fas fa-tachometer-alt"></i>
+        </button>
+
         <!-- Main Container -->
         <div class="main-container">
             <h1 class="app-title">Transcribe.IO</h1>
 
-            <!-- Record Tab -->
-            <div id="recordSection" class="tab-content active">
+            <!-- Login Button (Visible by Default) -->
+            <button id="loginButton" class="login-button">
+                <i class="fas fa-sign-in-alt"></i> Login
+            </button>
+
+            <!-- Record Tab (Hidden by Default) -->
+            <div id="recordSection" class="tab-content" style="display: none;">
                 <!-- Record Controls -->
                 <div class="record-controls">
                     <button id="pauseButton" class="pause-button">
@@ -61,11 +71,9 @@
                     </button>
                 </div>
 
-                <!-- Dashboard Button -->
-                <div class="dashboard-controls">
-                    <button id="dashboardBtn" class="dashboard-button">
-                        <i class="fas fa-tachometer-alt"></i> Go to Dashboard
-                    </button>
+                <!-- Remove the old dashboard button -->
+                <div class="dashboard-controls" style="display: none;">
+                    <!-- Old dashboard button removed -->
                 </div>
             </div>
         </div>

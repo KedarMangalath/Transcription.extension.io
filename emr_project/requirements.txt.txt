@@ -1,0 +1,5 @@
+Django
+djangorestframework
+django-rest-framework-simplejwt
+google-generativeai
+python-dotenv

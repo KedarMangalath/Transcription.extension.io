@@ -1,4 +1,6 @@
 document.addEventListener('DOMContentLoaded', function () {
+    // UI Elements
+    const loginButton = document.getElementById('loginButton');
     const recordButton = document.getElementById('recordButton');
     const processBtn = document.getElementById('processBtn');
     const audioPlayer = document.getElementById('audioPlayer');
@@ -8,19 +10,67 @@ document.addEventListener('DOMContentLoaded', function () {
     const downloadBtn = document.getElementById('downloadBtn');
     const uploadButton = document.getElementById('uploadButton');
     const uploadAudio = document.getElementById('uploadAudio');
-    const dashboardBtn = document.getElementById('dashboardBtn'); // New dashboard button
+    const dashboardBtn = document.getElementById('dashboardBtn');
+    const recordSection = document.getElementById('recordSection');
 
+    // Audio Recording Variables
     let isPaused = false;
     let abortController = null;
-
     let mediaRecorder;
     let audioChunks = [];
     let isRecording = false;
 
+    // Disable buttons by default
+    disableExtensionFeatures();
+
+    // Check if the user is already logged in
+    chrome.storage.local.get(['authToken'], (result) => {
+        if (result.authToken) {
+            console.log('Token found:', result.authToken);
+            enableExtensionFeatures(); // Enable buttons if token exists
+            loginButton.style.display = 'none'; // Hide login button if logged in
+            recordSection.style.display = 'block'; // Show the recording and processing UI
+        } else {
+            console.log('No token found. Please log in.');
+            disableExtensionFeatures(); // Disable buttons if no token
+        }
+    });
+
+    // Redirect to dashboard when the login button is clicked
+    loginButton.addEventListener('click', () => {
+        // Open the dashboard login page in a new tab
+        chrome.tabs.create({ url: 'http://localhost:8000/dashboard/' });
+    });
+
+    // Listen for messages from the background script
+    chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+        if (request.type === 'loginSuccess') {
+            // Hide the login button and show the rest of the extension UI
+            loginButton.style.display = 'none';
+            recordSection.style.display = 'block'; // Show the recording and processing UI
+            enableExtensionFeatures(); // Enable buttons after login
+        }
+    });
+
+    // Enable extension features after successful login
+    function enableExtensionFeatures() {
+        recordButton.disabled = false;
+        processBtn.disabled = false;
+        uploadButton.disabled = false;
+        dashboardBtn.disabled = false;
+    }
+
+    // Disable extension features if no token is found
+    function disableExtensionFeatures() {
+        recordButton.disabled = true;
+        processBtn.disabled = true;
+        uploadButton.disabled = true;
+        dashboardBtn.disabled = true;
+    }
+
     // Redirect to dashboard when the dashboard button is clicked
     dashboardBtn.addEventListener('click', () => {
-        // Replace with your dashboard URL
-        window.open('http://localhost:8000/api/dashboard/', '_blank');
+        window.open('http://localhost:8000/dashboard/', '_blank');
     });
 
     // Helper function to format time
@@ -65,26 +115,21 @@ document.addEventListener('DOMContentLoaded', function () {
     // Update the recording state
     function updateRecordingState(isRecording, isPaused) {
         if (isRecording) {
-            // Always show the stop icon when recording
             recordButton.querySelector('i').className = 'fas fa-stop';
             recordButton.classList.add('recording');
 
             if (isPaused) {
-                // Paused state: stop the pulsating animation
                 recordButton.classList.add('paused');
-                pauseButton.querySelector('i').className = 'fas fa-play'; // Pause button shows play icon
+                pauseButton.querySelector('i').className = 'fas fa-play';
             } else {
-                // Recording state: resume pulsating animation
                 recordButton.classList.remove('paused');
-                pauseButton.querySelector('i').className = 'fas fa-pause'; // Pause button shows pause icon
+                pauseButton.querySelector('i').className = 'fas fa-pause';
             }
 
-            // Show the pause button
             pauseButton.classList.add('visible');
         } else {
-            // Stop recording: reset everything
             recordButton.classList.remove('recording', 'paused');
-            recordButton.querySelector('i').className = 'fas fa-microphone'; // Reset to microphone icon
+            recordButton.querySelector('i').className = 'fas fa-microphone';
             pauseButton.classList.remove('visible');
         }
     }
@@ -105,7 +150,6 @@ document.addEventListener('DOMContentLoaded', function () {
                     mediaRecorder = new MediaRecorder(stream);
                     audioChunks = [];
 
-                    // Show the audio player before starting recording
                     showElement(audioPlayer);
 
                     mediaRecorder.addEventListener('dataavailable', (event) => {
@@ -175,7 +219,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (file && file.type.startsWith('audio/')) {
             const audioUrl = URL.createObjectURL(file);
             createCustomAudioPlayer(audioUrl);
-            audioChunks = [file]; // Store the file for processing
+            audioChunks = [file];
             processBtn.disabled = false;
         } else {
             alert('Please upload a valid audio file.');
@@ -204,7 +248,6 @@ document.addEventListener('DOMContentLoaded', function () {
         cardContent.className = 'result-content';
         cardContent.contentEditable = true;
 
-        // Format the content based on the title
         if (title === 'Patient Symptoms') {
             cardContent.innerHTML = `
                 <p><strong>Main Complaint:</strong> ${content.main_complaint || 'N/A'}</p>
@@ -231,7 +274,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 <p><strong>Suggested Tests:</strong> ${content.suggested_tests || 'N/A'}</p>
             `;
         } else {
-            // Fallback for unknown sections
             cardContent.textContent = JSON.stringify(content, null, 2);
         }
 
@@ -251,15 +293,12 @@ document.addEventListener('DOMContentLoaded', function () {
             processBtn.classList.add('processing');
             processBtn.innerHTML = 'Processing...';
 
-            // Show cancel button
             cancelProcessBtn.style.display = 'flex';
             cancelProcessBtn.classList.add('visible');
 
-            // Create new AbortController for this request
             abortController = new AbortController();
 
             try {
-                // Stop any playing audio and release resources
                 const audio = audioPlayer.querySelector('audio');
                 if (audio) {
                     audio.pause();
@@ -270,17 +309,16 @@ document.addEventListener('DOMContentLoaded', function () {
                 const formData = new FormData();
                 formData.append('audio', audioBlob, 'recording.wav');
 
-                console.log('Sending request to server...');
-                const response = await fetch('http://localhost:8000/api/process-audio/', {
+                const response = await fetch('http://localhost:8000/process-audio/', {
                     method: 'POST',
                     body: formData,
                     headers: {
                         Accept: 'application/json',
+                        Authorization: `Token ${await getAuthToken()}`, // Include the token
                     },
                     signal: abortController.signal,
                 });
 
-                console.log('Response status:', response.status);
                 if (!response.ok) {
                     const errorText = await response.text();
                     console.error('Server error response:', errorText);
@@ -290,10 +328,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 const data = await response.json();
                 console.log('Response data:', data);
 
-                // Clear existing results
                 resultsPanel.innerHTML = '';
 
-                // Create cards for each section of the medical information
                 if (data.patient_symptoms) {
                     const symptomsCard = createMedicalCard('Patient Symptoms', data.patient_symptoms);
                     resultsPanel.appendChild(symptomsCard);
@@ -316,7 +352,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 showElement(resultsPanel);
 
-                // Show the download button after processing is complete
                 downloadBtn.style.display = 'flex';
             } catch (error) {
                 console.error('Fetch error:', error);
@@ -339,7 +374,6 @@ document.addEventListener('DOMContentLoaded', function () {
     // Handle download button click
     if (downloadBtn) {
         downloadBtn.addEventListener('click', () => {
-            // Get the content from all cards
             const cards = document.querySelectorAll('.result-card');
             let content = '';
 
@@ -349,18 +383,13 @@ document.addEventListener('DOMContentLoaded', function () {
                 content += `${title}:\n${cardContent}\n\n`;
             });
 
-            // Create a Blob with the content
             const blob = new Blob([content], { type: 'text/plain' });
-
-            // Create a download link
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = 'medical_record.txt'; // File name
+            a.download = 'medical_record.txt';
             document.body.appendChild(a);
-            a.click(); // Trigger the download
-
-            // Clean up
+            a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
         });
@@ -379,6 +408,15 @@ document.addEventListener('DOMContentLoaded', function () {
                     cancelProcessBtn.style.display = 'none';
                 }, 300);
             }
+        });
+    }
+
+    // Helper function to get the authentication token
+    async function getAuthToken() {
+        return new Promise((resolve) => {
+            chrome.storage.local.get(['authToken'], (result) => {
+                resolve(result.authToken);
+            });
         });
     }
 });

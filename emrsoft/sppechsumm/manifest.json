@@ -7,22 +7,35 @@
         "activeTab",
         "storage",
         "tabs",
-        "identity"
+        "scripting"
     ],
     "host_permissions": [
-        "http://localhost:8000/*"  
+        "http://localhost:8000/*"
     ],
     "action": {
-        "default_popup": "popup.html"  
+        "default_popup": "popup.html",
+        "default_title": "EMR"
     },
     "background": {
-        "service_worker": "background.js"  
+        "service_worker": "background.js"
     },
+    "content_scripts": [
+        {
+            "matches": ["http://localhost:8000/dashboard/*"],
+            "js": ["content.js"]
+        }
+    ],
     "content_security_policy": {
         "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'; media-src 'self' blob: mediastream: http://localhost:8000; connect-src 'self' http://localhost:8000/ blob: mediastream:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com"
     },
-    "web_accessible_resources": [{
-        "resources": ["bootstrap.min.css", "bootstrap.bundle.min.js", "animate.min.css"],
-        "matches": ["<all_urls>"]
-    }]
+    "web_accessible_resources": [
+        {
+            "resources": [
+                "bootstrap.min.css",
+                "bootstrap.bundle.min.js",
+                "animate.min.css"
+            ],
+            "matches": ["<all_urls>"]
+        }
+    ]
 }

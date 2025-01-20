@@ -9,14 +9,19 @@ import json
 import uuid
 from datetime import datetime
 from dotenv import load_dotenv
+from django.views.decorators.http import require_http_methods
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.permissions import IsAuthenticated
 
-
-
-load_dotenv() 
-gemini_api_key=os.getenv("GEMINI_API_KEY")
+load_dotenv()
+gemini_api_key = os.getenv("GEMINI_API_KEY")
 
 genai.configure(api_key=gemini_api_key)
 
+@api_view(['POST'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
 @csrf_exempt
 def process_audio(request):
     if request.method == 'POST':
@@ -86,7 +91,7 @@ def process_audio(request):
 
             # Save to history
             user_id = "user_123"  # Replace with actual user ID (e.g., from authentication)
-            audio_filename = save_audio_file(audio_file.read())
+            audio_filename = save_audio_file(audio_file)  # Pass the file object, not file.read()
             History.objects.create(
                 user_id=user_id,
                 audio_name=secure_name,
@@ -110,7 +115,7 @@ def process_audio(request):
 
     return JsonResponse({'error': 'Invalid request method'}, status=400)
 
-def save_audio_file(audio_blob):
+def save_audio_file(audio_file):
     """Save the audio file to the 'media' directory and return the filename."""
     if not os.path.exists('media/audio'):
         os.makedirs('media/audio')
@@ -118,8 +123,14 @@ def save_audio_file(audio_blob):
     filename = f"{uuid.uuid4().hex}.wav"
     filepath = os.path.join('media/audio', filename)
 
-    with open(filepath, 'wb') as f:
-        f.write(audio_blob)
+    # Save the file chunk by chunk
+    with open(filepath, 'wb+') as destination:
+        for chunk in audio_file.chunks():
+            destination.write(chunk)
+
+    # Verify the file was saved correctly
+    if os.path.getsize(filepath) == 0:
+        raise Exception("Failed to save the audio file: File is empty.")
 
     return filename
 
@@ -136,13 +147,14 @@ def get_user_history(request):
                 'audio_name': entry.audio_name,
                 'transcription': entry.transcription,
                 'extracted_content': entry.extracted_content,
-                'audio_url': f"http://localhost:8000/media/audio/{entry.audio_filename}",
+                'audio_url': f"http://82.180.144.138:5645/media/audio/{entry.audio_filename}",
                 'timestamp': entry.timestamp.strftime("%Y-%m-%d %H:%M:%S")
             })
 
         return JsonResponse(history_data, safe=False)
 
     return JsonResponse({'error': 'Invalid request method'}, status=400)
+
 def dashboard(request):
     # Fetch history for the current user (replace 'user_123' with the actual user ID)
     user_id = "user_123"  # You can get this from the request if you have authentication
@@ -150,3 +162,24 @@ def dashboard(request):
     
     # Pass the history data to the template
     return render(request, 'emr_app/dashboard.html', {'history': history})
+
+from django.contrib.auth.models import User
+from rest_framework import generics, permissions
+from rest_framework.response import Response
+from rest_framework.authtoken.models import Token
+from .serializers import UserSerializer
+
+class RegisterView(generics.CreateAPIView):
+    queryset = User.objects.all()
+    permission_classes = [permissions.AllowAny]
+    serializer_class = UserSerializer
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
+        token, created = Token.objects.get_or_create(user=user)
+        return Response({
+            'username': user.username,
+            'token': token.key,
+        })
